@@ -1,4 +1,7 @@
 # dUnzip2
+
+> Originally taken from phpclasses.org, made by Alexandre Tedeschi. I will leave the link below for consultation.<br>[dUnzip2: Pack and unpack files packed in ZIP archives](https://www.phpclasses.org/package/2495-PHP-Pack-and-unpack-files-packed-in-ZIP-archives.html)
+
 Pack and unpack files packed in ZIP archives
 This package can be used to pack and unpack files in ZIP archives.
 

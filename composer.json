@@ -1,0 +1,34 @@
+{
+    "name": "ricardoapaes/dunzip2",
+    "type": "library",
+    "description": "This package can be used to pack and unpack files in ZIP archives.",
+    "require": {
+        "php": ">=5.6"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5.0 || ^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "AlexandreTedeschi\\dUnzip2\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "AlexandreTedeschi\\dUnzip2\\Tests\\": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Ricardo Araújo Paes",
+            "email": "ricardo@rpaes.com.br",
+            "homepage": "https://www.rpaes.com.br/"
+        }
+    ],
+    "scripts": {
+        "fix": "php-cs-fixer fix",
+        "fix:ci": "php-cs-fixer fix --dry-run --stop-on-violation",
+        "test": "phpunit",
+        "analyse": "phpstan analyse"
+    }
+}

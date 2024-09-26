@@ -1,0 +1,13 @@
+version: '3.7'
+
+networks:
+  default:
+    driver: bridge
+
+services:
+
+  wait:
+    image: jwilder/dockerize:latest
+    command: -wait tcp://php:9000 -timeout 120s
+    networks:
+      - default
