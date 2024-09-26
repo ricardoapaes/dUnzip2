@@ -1,0 +1,14 @@
+version: '3.7'
+
+networks:
+  default:
+    driver: bridge
+
+services:
+
+  php:
+    image: likesistemas/php-dev:${PHP_VERSION:-56}
+    volumes:
+      - ./:/var/www/public/
+    networks:
+      - default
