@@ -11,6 +11,7 @@ class dZip {
 	public $dirSignatureE = "\x50\x4b\x05\x06"; // end of central dir signature
 	public $files_count  = 0;
 	public $fh;
+	public $centraldirs = [];
 
 	public function dZip($filename, $overwrite = true) {
 		$this->filename  = $filename;
@@ -60,11 +61,11 @@ class dZip {
 		$details['crc_32']  = crc32($data);
 
 		// Convert date and time to DOS Format, and set then
-		$lastmod_timeS  = str_pad(decbin(date('s') >= 32 ? date('s') - 32 : date('s')), 5, '0', STR_PAD_LEFT);
-		$lastmod_timeM  = str_pad(decbin(date('i')), 6, '0', STR_PAD_LEFT);
-		$lastmod_timeH  = str_pad(decbin(date('H')), 5, '0', STR_PAD_LEFT);
-		$lastmod_dateD  = str_pad(decbin(date('d')), 5, '0', STR_PAD_LEFT);
-		$lastmod_dateM  = str_pad(decbin(date('m')), 4, '0', STR_PAD_LEFT);
+		$lastmod_timeS  = str_pad(decbin(date('s') >= 32 ? date('s') - 32 : (int) date('s')), 5, '0', STR_PAD_LEFT);
+		$lastmod_timeM  = str_pad(decbin((int) date('i')), 6, '0', STR_PAD_LEFT);
+		$lastmod_timeH  = str_pad(decbin((int) date('H')), 5, '0', STR_PAD_LEFT);
+		$lastmod_dateD  = str_pad(decbin((int) date('d')), 5, '0', STR_PAD_LEFT);
+		$lastmod_dateM  = str_pad(decbin((int) date('m')), 4, '0', STR_PAD_LEFT);
 		$lastmod_dateY  = str_pad(decbin(date('Y') - 1980), 7, '0', STR_PAD_LEFT);
 
 		# echo "ModTime: $lastmod_timeS-$lastmod_timeM-$lastmod_timeH (".date("s H H").")\n";

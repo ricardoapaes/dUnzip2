@@ -119,15 +119,17 @@ class dUnzip2 {
 
 		if($this->debug) {
 			#------- Debug compressedList
-			$kkk = 0;
+			$isHeader = true;
 			echo "<table border='0' style='font: 11px Verdana; border: 1px solid #000'>";
 			foreach($this->compressedList as $fileName => $item) {
-				if(! $kkk && $kkk = 1) {
+				if($isHeader) {
 					echo "<tr style='background: #ADA'>";
 					foreach($item as $fieldName => $value) {
 						echo "<td>$fieldName</td>";
 					}
 					echo '</tr>';
+
+					$isHeader = false;
 				}
 				echo "<tr style='background: #CFC'>";
 				foreach($item as $fieldName => $value) {
@@ -142,16 +144,18 @@ class dUnzip2 {
 			echo '</table>';
 
 			#------- Debug centralDirList
-			$kkk = 0;
+			$isHeader = true;
 			if(sizeof($this->centralDirList)) {
 				echo "<table border='0' style='font: 11px Verdana; border: 1px solid #000'>";
 				foreach($this->centralDirList as $fileName => $item) {
-					if(! $kkk && $kkk = 1) {
+					if($isHeader) {
 						echo "<tr style='background: #AAD'>";
 						foreach($item as $fieldName => $value) {
 							echo "<td>$fieldName</td>";
 						}
 						echo '</tr>';
+
+						$isHeader = false;
 					}
 					echo "<tr style='background: #CCF'>";
 					foreach($item as $fieldName => $value) {
@@ -167,7 +171,6 @@ class dUnzip2 {
 			}
 
 			#------- Debug endOfCentral
-			$kkk = 0;
 			if(sizeof($this->endOfCentral)) {
 				echo "<table border='0' style='font: 11px Verdana' style='border: 1px solid #000'>";
 				echo "<tr style='background: #DAA'><td colspan='2'>dUnzip - End of file</td></tr>";
@@ -214,7 +217,7 @@ class dUnzip2 {
 	public function unzip($compressedFileName, $targetFileName = false, $applyChmod = 0777) {
 		if(! sizeof($this->compressedList)) {
 			$this->debugMsg(1, 'Trying to unzip before loading file list... Loading it!');
-			$this->getList(false, $compressedFileName);
+			$this->getList(false);
 		}
 
 		$fdetails = &$this->compressedList[$compressedFileName];
