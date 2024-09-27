@@ -41,7 +41,7 @@ class dUnzip2Test extends TestCase {
 		$this->assertFiles(655);
 	}
 
-	private function assertFiles(int $expectedPermisson) {
+	private function assertFiles($expectedPermisson) {
 		$file1 = $this->srcUnzip . 'example.txt';
 		$this->assertFile($file1, $expectedPermisson);
 
@@ -52,13 +52,13 @@ class dUnzip2Test extends TestCase {
 		unlink($file2);
 	}
 
-	private function assertFile(string $file, int $expectedPermisson) {
+	private function assertFile($file, $expectedPermisson) {
 		$this->assertFileExists($file);
 		$this->assertFileIsWritable($file);
 		$this->assertChmod($file, $expectedPermisson);
 	}
 
-	private function assertChmod(string $fileToCreate, int $expectedPermisson) {
+	private function assertChmod($fileToCreate, $expectedPermisson) {
 		$perms = fileperms($fileToCreate);
 		$filePermisson = substr(sprintf('%o', $perms), - 4);
 		$this->assertEquals($expectedPermisson, $filePermisson, sprintf('File permission \'%s\' is not \'%d\'.', $perms, $expectedPermisson));
