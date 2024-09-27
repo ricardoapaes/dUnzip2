@@ -71,6 +71,7 @@ class dUnzip2 {
 	public function getVersion() {
 		return '2.67';
 	}
+
 	// Public
 	public $fileName;
 	public $lastError;
@@ -80,13 +81,12 @@ class dUnzip2 {
 	public $debug;
 
 	// Private
-	public $fh;
-	public $zipSignature = "\x50\x4b\x03\x04"; // local file header signature
-	public $dirSignature = "\x50\x4b\x01\x02"; // central dir header signature
-	public $dirSignatureE = "\x50\x4b\x05\x06"; // end of central dir signature
+	private $fh;
+	private $zipSignature = "\x50\x4b\x03\x04"; // local file header signature
+	private $dirSignature = "\x50\x4b\x01\x02"; // central dir header signature
+	private $dirSignatureE = "\x50\x4b\x05\x06"; // end of central dir signature
 
-	// Public
-	public function dUnzip2($fileName) {
+	public function __construct($fileName) {
 		$this->fileName       = $fileName;
 		$this->compressedList =
 		$this->centralDirList =

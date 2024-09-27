@@ -13,7 +13,7 @@ class dZip {
 	public $fh;
 	public $centraldirs = [];
 
-	public function dZip($filename, $overwrite = true) {
+	public function __construct($filename, $overwrite = true) {
 		$this->filename  = $filename;
 		$this->overwrite = $overwrite;
 	}
@@ -142,8 +142,7 @@ class dZip {
 		fclose($fh);
 	}
 
-	// Private
-	public function appendCentralDir($filename, $properties) {
+	private function appendCentralDir($filename, $properties) {
 		$this->centraldirs[$filename] = $properties;
 	}
 }
