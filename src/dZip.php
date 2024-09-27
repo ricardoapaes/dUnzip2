@@ -3,12 +3,37 @@
 namespace AlexandreTedeschi\dUnzip2;
 
 class dZip {
+	/**
+	 * @var string
+	 */
 	public $filename;
+
+	/**
+	 * @var bool
+	 */
 	public $overwrite;
 
-	public $zipSignature = "\x50\x4b\x03\x04"; // local file header signature
-	public $dirSignature = "\x50\x4b\x01\x02"; // central dir header signature
-	public $dirSignatureE = "\x50\x4b\x05\x06"; // end of central dir signature
+	/**
+	 * Local file header signature
+	 *
+	 * @var string
+	 */
+	public $zipSignature = "\x50\x4b\x03\x04";
+
+	/**
+	 * Central dir header signature	 *
+	 *
+	 * @var string
+	 */
+	public $dirSignature = "\x50\x4b\x01\x02";
+
+	/**
+	 * End of central dir signature
+	 *
+	 * @var string
+	 */
+	public $dirSignatureE = "\x50\x4b\x05\x06";
+
 	public $files_count  = 0;
 	public $fh;
 	public $centraldirs = [];
@@ -17,26 +42,29 @@ class dZip {
 		$this->filename  = $filename;
 		$this->overwrite = $overwrite;
 	}
-	public function addDir($dirname, $fileComments = '') {
-		if(substr($dirname, -1) != '/') {
+
+	public function addDir(string $dirname, $fileComments = '') {
+		if(substr($dirname, -1) !== '/') {
 			$dirname .= '/';
 		}
+
 		$this->addFile(false, $dirname, $fileComments);
 	}
+
 	public function addFile($filename, $cfilename, $fileComments = '', $data = false) {
 		if(! ($fh = &$this->fh)) {
 			$fh = fopen($this->filename, $this->overwrite ? 'wb' : 'a+b');
 		}
 
 		// $filename can be a local file OR the data wich will be compressed
-		if(substr($cfilename, -1) == '/') {
+		if(substr($cfilename, -1) === '/') {
 			$details['uncsize'] = 0;
 			$data = '';
 		} elseif(file_exists($filename)) {
 			$details['uncsize'] = filesize($filename);
 			$data = file_get_contents($filename);
 		} elseif($filename) {
-			echo "<b>Cannot add $filename. File not found</b><br>";
+			echo sprintf('<b>Cannot add %s. File not found</b><br>', $filename);
 			return false;
 		} else {
 			$details['uncsize'] = strlen($filename);
@@ -70,8 +98,8 @@ class dZip {
 
 		# echo "ModTime: $lastmod_timeS-$lastmod_timeM-$lastmod_timeH (".date("s H H").")\n";
 		# echo "ModDate: $lastmod_dateD-$lastmod_dateM-$lastmod_dateY (".date("d m Y").")\n";
-		$details['modtime'] = bindec("$lastmod_timeH$lastmod_timeM$lastmod_timeS");
-		$details['moddate'] = bindec("$lastmod_dateY$lastmod_dateM$lastmod_dateD");
+		$details['modtime'] = bindec($lastmod_timeH . $lastmod_timeM . $lastmod_timeS);
+		$details['moddate'] = bindec($lastmod_dateY . $lastmod_dateM . $lastmod_dateD);
 
 		$details['offset'] = ftell($fh);
 		fwrite($fh, $this->zipSignature);
@@ -90,14 +118,17 @@ class dZip {
 		fwrite($fh, $zdata);
 
 		// Append it to central dir
-		$details['external_attributes']  = (substr($cfilename, -1) == '/' && ! $zdata) ? 16 : 32; // Directory or file name
+		$details['external_attributes']  = (substr($cfilename, -1) === '/' && ! $zdata) ? 16 : 32; // Directory or file name
 		$details['comments']             = $fileComments;
 		$this->appendCentralDir($cfilename, $details);
 		$this->files_count++;
+		return null;
 	}
+
 	public function setExtra($filename, $property, $value) {
 		$this->centraldirs[$filename][$property] = $value;
 	}
+
 	public function save($zipComments = '') {
 		if(! ($fh = &$this->fh)) {
 			$fh = fopen($this->filename, $this->overwrite ? 'w' : 'a+');
@@ -125,6 +156,7 @@ class dZip {
 			$cdrec .= $filename;
 			$cdrec .= $cd['comments'];
 		}
+
 		$before_cd = ftell($fh);
 		fwrite($fh, $cdrec);
 
@@ -142,7 +174,7 @@ class dZip {
 		fclose($fh);
 	}
 
-	private function appendCentralDir($filename, $properties) {
+	private function appendCentralDir($filename, array $properties) {
 		$this->centraldirs[$filename] = $properties;
 	}
 }

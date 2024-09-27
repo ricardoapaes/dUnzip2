@@ -8,6 +8,7 @@ use AlexandreTedeschi\dUnzip2\dZip;
 
 class dZipTest extends TestCase {
 	private $srcFile = __DIR__ . '/../README.md';
+
 	private $srcZip = __DIR__ . '/./unzip/example.zip';
 
 	public function testInstance() {

@@ -74,27 +74,32 @@ class dUnzip2 {
 
 	// Public
 	public $fileName;
+
 	public $lastError;
-	public $compressedList; // You will problably use only this one!
-	public $centralDirList; // Central dir list... It's a kind of 'extra attributes' for a set of files
-	public $endOfCentral;   // End of central dir, contains ZIP Comments
+
+	public $compressedList = [];
+	// You will problably use only this one!
+	public $centralDirList = [];
+	// Central dir list... It's a kind of 'extra attributes' for a set of files
+	public $endOfCentral = [];
+	// End of central dir, contains ZIP Comments
 	public $debug;
 
 	// Private
 	private $fh;
-	private $zipSignature = "\x50\x4b\x03\x04"; // local file header signature
-	private $dirSignature = "\x50\x4b\x01\x02"; // central dir header signature
+
+	private $zipSignature = "\x50\x4b\x03\x04";
+	// local file header signature
+	private $dirSignature = "\x50\x4b\x01\x02";
+	// central dir header signature
 	private $dirSignatureE = "\x50\x4b\x05\x06"; // end of central dir signature
 
 	public function __construct($fileName) {
 		$this->fileName       = $fileName;
-		$this->compressedList =
-		$this->centralDirList =
-		$this->endOfCentral   = [];
 	}
 
 	public function getList($stopOnFile = false) {
-		if(sizeof($this->compressedList)) {
+		if(count($this->compressedList) !== 0) {
 			$this->debugMsg(1, 'Returning already loaded file list.');
 			return $this->compressedList;
 		}
@@ -121,77 +126,88 @@ class dUnzip2 {
 			#------- Debug compressedList
 			$isHeader = true;
 			echo "<table border='0' style='font: 11px Verdana; border: 1px solid #000'>";
-			foreach($this->compressedList as $fileName => $item) {
+			foreach($this->compressedList as $item) {
 				if($isHeader) {
 					echo "<tr style='background: #ADA'>";
 					foreach($item as $fieldName => $value) {
-						echo "<td>$fieldName</td>";
+						echo sprintf('<td>%s</td>', $fieldName);
 					}
+
 					echo '</tr>';
 
 					$isHeader = false;
 				}
+
 				echo "<tr style='background: #CFC'>";
 				foreach($item as $fieldName => $value) {
 					if($fieldName == 'lastmod_datetime') {
-						echo "<td title='$fieldName' nowrap='nowrap'>".date('d/m/Y H:i:s', $value).'</td>';
+						echo sprintf('<td title=\'%s\' nowrap=\'nowrap\'>', $fieldName).date('d/m/Y H:i:s', $value).'</td>';
 					} else {
-						echo "<td title='$fieldName' nowrap='nowrap'>$value</td>";
+						echo sprintf('<td title=\'%s\' nowrap=\'nowrap\'>%s</td>', $fieldName, $value);
 					}
 				}
+
 				echo '</tr>';
 			}
+
 			echo '</table>';
 
 			#------- Debug centralDirList
 			$isHeader = true;
-			if(sizeof($this->centralDirList)) {
+			if(count($this->centralDirList) !== 0) {
 				echo "<table border='0' style='font: 11px Verdana; border: 1px solid #000'>";
-				foreach($this->centralDirList as $fileName => $item) {
+				foreach($this->centralDirList as $item) {
 					if($isHeader) {
 						echo "<tr style='background: #AAD'>";
 						foreach($item as $fieldName => $value) {
-							echo "<td>$fieldName</td>";
+							echo sprintf('<td>%s</td>', $fieldName);
 						}
+
 						echo '</tr>';
 
 						$isHeader = false;
 					}
+
 					echo "<tr style='background: #CCF'>";
 					foreach($item as $fieldName => $value) {
 						if($fieldName == 'lastmod_datetime') {
-							echo "<td title='$fieldName' nowrap='nowrap'>".date('d/m/Y H:i:s', $value).'</td>';
+							echo sprintf('<td title=\'%s\' nowrap=\'nowrap\'>', $fieldName).date('d/m/Y H:i:s', $value).'</td>';
 						} else {
-							echo "<td title='$fieldName' nowrap='nowrap'>$value</td>";
+							echo sprintf('<td title=\'%s\' nowrap=\'nowrap\'>%s</td>', $fieldName, $value);
 						}
 					}
+
 					echo '</tr>';
 				}
+
 				echo '</table>';
 			}
 
 			#------- Debug endOfCentral
-			if(sizeof($this->endOfCentral)) {
+			if(count($this->endOfCentral) !== 0) {
 				echo "<table border='0' style='font: 11px Verdana' style='border: 1px solid #000'>";
 				echo "<tr style='background: #DAA'><td colspan='2'>dUnzip - End of file</td></tr>";
 				foreach($this->endOfCentral as $field => $value) {
 					echo '<tr>';
-					echo "<td style='background: #FCC'>$field</td>";
-					echo "<td style='background: #FDD'>$value</td>";
+					echo sprintf('<td style=\'background: #FCC\'>%s</td>', $field);
+					echo sprintf('<td style=\'background: #FDD\'>%s</td>', $value);
 					echo '</tr>';
 				}
+
 				echo '</table>';
 			}
 		}
 
 		return $this->compressedList;
 	}
+
 	public function getExtraInfo($compressedFileName) {
 		return
 			isset($this->centralDirList[$compressedFileName]) ?
 			$this->centralDirList[$compressedFileName] :
 			false;
 	}
+
 	public function getZipInfo($detail = false) {
 		return $detail ?
 			$this->endOfCentral[$detail] :
@@ -205,32 +221,36 @@ class dUnzip2 {
 		}
 
 		$lista = $this->getList();
-		if(sizeof($lista)) {
+		if(count($lista) !== 0) {
 			foreach($lista as $fileName => $fileInfo) {
 				if(false === call_user_func($cbEachCompreesedFile, $fileName, $fileInfo)) {
 					return false;
 				}
 			}
 		}
+
 		return true;
 	}
+
 	public function unzip($compressedFileName, $targetFileName = false, $applyChmod = 0777) {
-		if(! sizeof($this->compressedList)) {
+		if(count($this->compressedList) === 0) {
 			$this->debugMsg(1, 'Trying to unzip before loading file list... Loading it!');
 			$this->getList(false);
 		}
 
 		$fdetails = &$this->compressedList[$compressedFileName];
 		if(! isset($this->compressedList[$compressedFileName])) {
-			$this->debugMsg(2, "File '<b>$compressedFileName</b>' is not compressed in the zip.");
+			$this->debugMsg(2, sprintf('File \'<b>%s</b>\' is not compressed in the zip.', $compressedFileName));
 			return false;
 		}
-		if(substr($compressedFileName, -1) == '/') {
-			$this->debugMsg(2, "Trying to unzip a folder name '<b>$compressedFileName</b>'.");
+
+		if(substr($compressedFileName, -1) === '/') {
+			$this->debugMsg(2, sprintf('Trying to unzip a folder name \'<b>%s</b>\'.', $compressedFileName));
 			return false;
 		}
+
 		if(! $fdetails['uncompressed_size']) {
-			$this->debugMsg(1, "File '<b>$compressedFileName</b>' is empty.");
+			$this->debugMsg(1, sprintf('File \'<b>%s</b>\' is empty.', $compressedFileName));
 			return $targetFileName ?
 				file_put_contents($targetFileName, '') :
 				'';
@@ -251,20 +271,21 @@ class dUnzip2 {
 
 		return $ret;
 	}
+
 	public function unzipAll($targetDir = false, $baseDir = '', $maintainStructure = true, $applyChmod = 0777) {
 		if($targetDir === false) {
 			$targetDir = dirname($_SERVER['SCRIPT_FILENAME']).'/';
 		}
 
-		if(substr($targetDir, -1) == '/') {
+		if(substr($targetDir, -1) === '/') {
 			$targetDir = substr($targetDir, 0, -1);
 		}
 
 		$lista = $this->getList();
-		if(sizeof($lista)) {
+		if(count($lista) !== 0) {
 			foreach($lista as $fileName => $trash) {
 				$dirname  = dirname($fileName);
-				$outDN    = "$targetDir/$dirname";
+				$outDN    = sprintf('%s/%s', $targetDir, $dirname);
 
 				if(substr($dirname, 0, strlen($baseDir)) != $baseDir) {
 					continue;
@@ -274,23 +295,24 @@ class dUnzip2 {
 					$str = '';
 					$folders = explode('/', $dirname);
 					foreach($folders as $folder) {
-						$str = $str ? "$str/$folder" : $folder;
-						if(! is_dir("$targetDir/$str")) {
-							$this->debugMsg(1, "Creating folder: $targetDir/$str");
-							mkdir("$targetDir/$str");
+						$str = $str !== '' && $str !== '0' ? sprintf('%s/%s', $str, $folder) : $folder;
+						if(! is_dir(sprintf('%s/%s', $targetDir, $str))) {
+							$this->debugMsg(1, sprintf('Creating folder: %s/%s', $targetDir, $str));
+							mkdir(sprintf('%s/%s', $targetDir, $str));
 							if($applyChmod) {
-								chmod("$targetDir/$str", $applyChmod);
+								chmod(sprintf('%s/%s', $targetDir, $str), $applyChmod);
 							}
 						}
 					}
 				}
-				if(substr($fileName, -1, 1) == '/') {
+
+				if(substr($fileName, -1, 1) === '/') {
 					continue;
 				}
 
 				$maintainStructure ?
-					$this->unzip($fileName, "$targetDir/$fileName", $applyChmod) :
-					$this->unzip($fileName, "$targetDir/".basename($fileName), $applyChmod);
+					$this->unzip($fileName, sprintf('%s/%s', $targetDir, $fileName), $applyChmod) :
+					$this->unzip($fileName, $targetDir . '/'.basename($fileName), $applyChmod);
 			}
 		}
 	}
@@ -300,6 +322,7 @@ class dUnzip2 {
 			fclose($this->fh);
 		}
 	}
+
 	public function __destroy() {
 		$this->close();
 	}
@@ -347,22 +370,25 @@ class dUnzip2 {
 				$this->debugMsg(2, 'IBM TERSE is not supported... yet?');
 				return false;
 			default:
-				$this->debugMsg(2, "Unknown uncompress method: $mode");
+				$this->debugMsg(2, 'Unknown uncompress method: ' . $mode);
 				return false;
 		}
 	}
+
 	public function debugMsg($level, $string) {
 		if($this->debug) {
 			if($level == 1) {
-				echo "<b style='color: #777'>dUnzip2:</b> $string<br>";
+				echo sprintf('<b style=\'color: #777\'>dUnzip2:</b> %s<br>', $string);
 			}
 
 			if($level == 2) {
-				echo "<b style='color: #F00'>dUnzip2:</b> $string<br>";
+				echo sprintf('<b style=\'color: #F00\'>dUnzip2:</b> %s<br>', $string);
 			}
 		}
+
 		$this->lastError = $string;
 	}
+
 	public function getLastError() {
 		return $this->lastError;
 	}
@@ -476,16 +502,19 @@ class dUnzip2 {
 						$this->compressedList[$filename]['lastmod_datetime']   = $details['lastmod_datetime'];
 						$this->compressedList[$filename]['extra_field']        = $i['extra_field'];
 						$this->compressedList[$filename]['contents-startOffset'] = $i['contents-startOffset'];
-						if(strtolower($stopOnFile) == strtolower($filename)) {
+						if(strtolower($stopOnFile) === strtolower($filename)) {
 							break;
 						}
 					}
 				}
+
 				return true;
 			}
 		}
+
 		return false;
 	}
+
 	public function _loadFileListBySignatures(&$fh, $stopOnFile = false) {
 		fseek($fh, 0);
 
@@ -497,20 +526,23 @@ class dUnzip2 {
 				fseek($fh, 12 - 4, SEEK_CUR); // 12: Data descriptor - 4: Signature (that will be read again)
 				$details = $this->_getFileHeaderInformation($fh);
 			}
+
 			if(! $details) {
 				$this->debugMsg(1, 'Still invalid signature. Probably reached the end of the file.');
 				break;
 			}
+
 			$filename = $details['file_name'];
 			$this->compressedList[$filename] = $details;
 			$return = true;
-			if(strtolower($stopOnFile) == strtolower($filename)) {
+			if(strtolower($stopOnFile) === strtolower($filename)) {
 				break;
 			}
 		}
 
 		return $return;
 	}
+
 	public function _getFileHeaderInformation(&$fh, $startOffset = false) {
 		if($startOffset !== false) {
 			fseek($fh, $startOffset);
@@ -572,6 +604,7 @@ class dUnzip2 {
 			];
 			return $i;
 		}
+
 		return false;
 	}
 
@@ -584,6 +617,7 @@ class dUnzip2 {
 
 		return strtr($filename, $from, $to);
 	}
+
 	public function _protect($fullPath) {
 		// Known hack-attacks (filename like):
 		//   /home/usr
@@ -592,11 +626,11 @@ class dUnzip2 {
 		//   sample/(x0)../home/usr
 
 		$fullPath = strtr($fullPath, ":*<>|\"\x0\\", '......./');
-		while($fullPath[0] == '/') {
+		while($fullPath[0] === '/') {
 			$fullPath = substr($fullPath, 1);
 		}
 
-		if(substr($fullPath, -1) == '/') {
+		if(substr($fullPath, -1) === '/') {
 			$base     = '';
 			$fullPath = substr($fullPath, 0, -1);
 		} else {
@@ -607,9 +641,9 @@ class dUnzip2 {
 		$parts   = explode('/', $fullPath);
 		$lastIdx = false;
 		foreach($parts as $idx => $part) {
-			if($part == '.') {
+			if($part === '.') {
 				unset($parts[$idx]);
-			} elseif($part == '..') {
+			} elseif($part === '..') {
 				unset($parts[$idx]);
 				if($lastIdx !== false) {
 					unset($parts[$lastIdx]);
@@ -621,7 +655,7 @@ class dUnzip2 {
 			}
 		}
 
-		$fullPath = sizeof($parts) ? implode('/', $parts).'/' : '';
+		$fullPath = $parts !== [] ? implode('/', $parts).'/' : '';
 		return $fullPath.$base;
 	}
 }
