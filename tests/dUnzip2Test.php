@@ -2,8 +2,8 @@
 
 namespace AlexandreTedeschi\dUnzip2\Tests;
 
+use dUnzip2;
 use PHPUnit\Framework\TestCase;
-use AlexandreTedeschi\dUnzip2\dUnzip2;
 
 class dUnzip2Test extends TestCase {
 	private $srcFile = __DIR__ . '/./example.zip';

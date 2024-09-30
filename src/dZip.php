@@ -1,7 +1,5 @@
 <?php
 
-namespace AlexandreTedeschi\dUnzip2;
-
 class dZip {
 	/**
 	 * @var string
