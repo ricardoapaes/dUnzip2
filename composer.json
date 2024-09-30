@@ -9,8 +9,10 @@
         "phpunit/phpunit": "^5.0 || ^9.0"
     },
     "autoload": {
-        "psr-4": {
-            "AlexandreTedeschi\\dUnzip2\\": "src/"
+        "psr-0": {
+            "": [
+                "src/"
+            ]
         }
     },
     "autoload-dev": {

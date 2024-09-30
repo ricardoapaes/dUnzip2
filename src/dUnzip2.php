@@ -1,7 +1,5 @@
 <?php
 
-namespace AlexandreTedeschi\dUnzip2;
-
 // 22/03/2013 (v2.67)
 // - New method: ->each(function($fileName, $fileInfo) use ($zip)), works as jQuery.
 //   Example: $z->each(function($filename) use ($z){ $z->unzip($filename, "unc/".basename($filename)); });

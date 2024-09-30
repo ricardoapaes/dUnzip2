@@ -2,9 +2,9 @@
 
 namespace AlexandreTedeschi\dUnzip2\Tests;
 
-use AlexandreTedeschi\dUnzip2\dUnzip2;
+use dUnzip2;
+use dZip;
 use PHPUnit\Framework\TestCase;
-use AlexandreTedeschi\dUnzip2\dZip;
 
 class dZipTest extends TestCase {
 	private $srcFile = __DIR__ . '/../README.md';
