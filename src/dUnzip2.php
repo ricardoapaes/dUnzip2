@@ -261,7 +261,7 @@ class dUnzip2 {
 			$fdetails['compression_method'],
 			$fdetails['uncompressed_size'],
 			$targetFileName,
-			$applyChmod,
+			$applyChmod
 		);
 
 		unset($toUncompress);
