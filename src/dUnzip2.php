@@ -250,7 +250,7 @@ class dUnzip2 {
 		if(! $fdetails['uncompressed_size']) {
 			$this->debugMsg(1, sprintf('File \'<b>%s</b>\' is empty.', $compressedFileName));
 			return $targetFileName ?
-				file_put_contents($targetFileName, '') :
+				$this->saveFile($targetFileName, '', $applyChmod) :
 				'';
 		}
 
@@ -260,12 +260,11 @@ class dUnzip2 {
 			$toUncompress,
 			$fdetails['compression_method'],
 			$fdetails['uncompressed_size'],
-			$targetFileName
+			$targetFileName,
+			$applyChmod,
 		);
+
 		unset($toUncompress);
-		if($applyChmod && $targetFileName) {
-			chmod($targetFileName, $applyChmod);
-		}
 
 		return $ret;
 	}
@@ -296,10 +295,7 @@ class dUnzip2 {
 						$str = $str !== '' && $str !== '0' ? sprintf('%s/%s', $str, $folder) : $folder;
 						if(! is_dir(sprintf('%s/%s', $targetDir, $str))) {
 							$this->debugMsg(1, sprintf('Creating folder: %s/%s', $targetDir, $str));
-							mkdir(sprintf('%s/%s', $targetDir, $str));
-							if($applyChmod) {
-								chmod(sprintf('%s/%s', $targetDir, $str), $applyChmod);
-							}
+							mkdir(sprintf('%s/%s', $targetDir, $str), $applyChmod, true);
 						}
 					}
 				}
@@ -325,13 +321,18 @@ class dUnzip2 {
 		$this->close();
 	}
 
-	// Private (you should NOT call these methods):
-	public function uncompress(&$content, $mode, $uncompressedSize, $targetFileName = false) {
+	private function saveFile($filename, $content, $applyChmod = 0777) {
+		touch($filename);
+		chmod($filename, $applyChmod);
+		file_put_contents($filename, $content);
+	}
+
+	private function uncompress(&$content, $mode, $uncompressedSize, $targetFileName = false, $applyChmod = 0777) {
 		switch($mode) {
 			case 0:
 				// Not compressed
 				return $targetFileName ?
-					file_put_contents($targetFileName, $content) :
+					$this->saveFile($targetFileName, $content, $applyChmod) :
 					$content;
 			case 1:
 				$this->debugMsg(2, 'Shrunk mode is not supported... yet?');
@@ -351,7 +352,7 @@ class dUnzip2 {
 			case 8:
 				// Deflate
 				return $targetFileName ?
-					file_put_contents($targetFileName, gzinflate($content, $uncompressedSize)) :
+					$this->saveFile($targetFileName, gzinflate($content, $uncompressedSize), $applyChmod) :
 					gzinflate($content, $uncompressedSize);
 			case 9:
 				$this->debugMsg(2, 'Enhanced Deflating is not supported... yet?');
@@ -362,7 +363,7 @@ class dUnzip2 {
 			case 12:
 				// Bzip2
 				return $targetFileName ?
-				   file_put_contents($targetFileName, bzdecompress($content)) :
+				   $this->saveFile($targetFileName, bzdecompress($content), $applyChmod) :
 				   bzdecompress($content);
 			case 18:
 				$this->debugMsg(2, 'IBM TERSE is not supported... yet?');
