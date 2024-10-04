@@ -322,9 +322,22 @@ class dUnzip2 {
 	}
 
 	private function saveFile($filename, $content, $applyChmod = 0777) {
-		touch($filename);
-		chmod($filename, $applyChmod);
-		file_put_contents($filename, $content);
+		$ok = @touch($filename);
+		if(! $ok) {
+			throw new Exception(sprintf('Failed to create file: %s', $filename));
+		}
+
+		$ok = @chmod($filename, $applyChmod);
+		if(! $ok) {
+			throw new Exception(sprintf('Failed to chmod file: %s with permission %s', $filename, $applyChmod));
+		}
+
+		$bytesWritten = @file_put_contents($filename, $content);
+		if($bytesWritten === false) {
+			throw new Exception(sprintf('Failed to write file: %s', $filename));
+		}
+
+		$this->debugMsg(2, sprintf('File <b>%s</b> saved with %d bytes.', $filename, $bytesWritten));
 	}
 
 	private function uncompress(&$content, $mode, $uncompressedSize, $targetFileName = false, $applyChmod = 0777) {
